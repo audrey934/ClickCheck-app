@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClickCheck — check a link before you click it</title>
+  <meta name="description" content="Scan any URL against Google Safe Browsing and 70+ antivirus engines before you click." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2 4 5.5v6c0 4.8 3.4 8.6 8 10.5 4.6-1.9 8-5.7 8-10.5v-6L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="m8.5 12 2.4 2.4 4.6-4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>ClickCheck</span>
+    </div>
+    <p class="tagline">Check a link <em>before</em> you click it.</p>
+  </header>
+
+  <main>
+    <!-- scan box -->
+    <section class="scanner" aria-label="URL scanner">
+      <label class="scanner-label" for="url-input">Paste a suspicious link</label>
+      <div class="scanner-bar">
+        <input
+          id="url-input"
+          type="text"
+          placeholder="e.g. mtn-momo-bonus.win/claim"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="scan-btn" type="button">Scan link</button>
+      </div>
+      <p class="scanner-hint">
+        Checked against Google Safe Browsing and 70+ antivirus engines via VirusTotal.
+        Nothing is opened or clicked on your behalf.
+      </p>
+      <p id="form-error" class="form-error" role="alert" hidden></p>
+    </section>
+
+    <!-- result card, script.js fills this in after a scan -->
+    <section id="verdict" class="verdict" hidden aria-live="polite"></section>
+
+    <!-- past scans table -->
+    <section class="history">
+      <div class="history-head">
+        <h2>Scan history</h2>
+        <button id="clear-history" class="ghost-btn" type="button">Clear history</button>
+      </div>
+
+      <div class="history-controls">
+        <input id="history-search" type="search" placeholder="Search scanned URLs…" aria-label="Search history" />
+        <select id="history-filter" aria-label="Filter by verdict">
+          <option value="all">All verdicts</option>
+          <option value="safe">Safe only</option>
+          <option value="suspicious">Suspicious only</option>
+          <option value="dangerous">Dangerous only</option>
+        </select>
+        <select id="history-sort" aria-label="Sort history">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="risk-high">Highest risk first</option>
+          <option value="risk-low">Lowest risk first</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table id="history-table">
+          <thead>
+            <tr>
+              <th scope="col">URL</th>
+              <th scope="col">Verdict</th>
+              <th scope="col">Risk</th>
+              <th scope="col">Checked</th>
+            </tr>
+          </thead>
+          <tbody id="history-body"></tbody>
+        </table>
+        <p id="history-empty" class="history-empty">No scans yet. Your checked links will appear here.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      Data by
+      <a href="https://developers.google.com/safe-browsing" target="_blank" rel="noopener">Google Safe Browsing</a>
+      and
+      <a href="https://www.virustotal.com" target="_blank" rel="noopener">VirusTotal</a>.
+      A verdict of “safe” means no engine flagged the link — stay cautious with personal data.
+    </p>
+    <p class="served-by" id="served-by"></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
