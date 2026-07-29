@@ -1,0 +1,21 @@
+# systemd service for clickcheck
+# without this, the app dies the second I close the SSH session.
+# this keeps it running in the background and restarts it if it crashes.
+
+[Unit]
+Description=ClickCheck URL safety checker
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/var/www/clickcheck
+# keys and PORT/SERVER_NAME live in .env on the server, not in this file
+EnvironmentFile=/var/www/clickcheck/.env
+ExecStart=/usr/bin/node server.js
+# if it crashes, try again after 5 seconds instead of just staying dead
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
