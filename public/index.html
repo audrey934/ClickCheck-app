@@ -1,55 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ClickCheck — check a link before you click it</title>
   <meta name="description" content="Scan any URL against Google Safe Browsing and 70+ antivirus engines before you click." />
+  <meta name="color-scheme" content="light dark" />
+
+  <!-- picks the theme before the page draws, otherwise dark mode
+       flashes white for a second when you load it -->
+  <script>
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('clickcheck-theme'); } catch (e) {}
+      var prefersDark = window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = saved || (prefersDark ? 'dark' : 'light');
+    })();
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <header class="site-header">
     <div class="brand">
       <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M12 2 4 5.5v6c0 4.8 3.4 8.6 8 10.5 4.6-1.9 8-5.7 8-10.5v-6L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
         <path d="m8.5 12 2.4 2.4 4.6-4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <span>ClickCheck</span>
+      <span class="brand-name">ClickCheck</span>
     </div>
-    <p class="tagline">Check a link <em>before</em> you click it.</p>
+
+    <!-- light / dark switch -->
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch colour theme">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9 5.3 5.3"
+              stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2Z"
+              stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </header>
 
   <main>
-    <!-- scan box -->
+
+    <!-- the scan box -->
     <section class="scanner" aria-label="URL scanner">
-      <label class="scanner-label" for="url-input">Paste a suspicious link</label>
+      <p class="eyebrow">Link inspection</p>
+      <h1 class="scanner-label">
+        <label for="url-input">Check a link <em>before</em> you click it.</label>
+      </h1>
+
       <div class="scanner-bar">
         <input
           id="url-input"
           type="text"
-          placeholder="e.g. mtn-momo-bonus.win/claim"
+          placeholder="mtn-momo-bonus.win/claim"
           autocomplete="off"
+          autocapitalize="off"
           spellcheck="false"
         />
         <button id="scan-btn" type="button">Scan link</button>
       </div>
+
+      <p id="form-error" class="form-error" role="alert" hidden></p>
+
       <p class="scanner-hint">
         Checked against Google Safe Browsing and 70+ antivirus engines via VirusTotal.
         Nothing is opened or clicked on your behalf.
       </p>
-      <p id="form-error" class="form-error" role="alert" hidden></p>
     </section>
 
     <!-- result card, script.js fills this in after a scan -->
     <section id="verdict" class="verdict" hidden aria-live="polite"></section>
 
-    <!-- past scans table -->
+    <!-- past scans -->
     <section class="history">
       <div class="history-head">
-        <h2>Scan history</h2>
+        <div>
+          <p class="eyebrow">Previous checks</p>
+          <h2>Scan history</h2>
+        </div>
         <button id="clear-history" class="ghost-btn" type="button">Clear history</button>
       </div>
 
@@ -84,11 +122,12 @@
         <p id="history-empty" class="history-empty">No scans yet. Your checked links will appear here.</p>
       </div>
     </section>
+
   </main>
 
   <footer class="site-footer">
-    <p>
-      Data by
+    <p class="credits">
+      Threat data by
       <a href="https://developers.google.com/safe-browsing" target="_blank" rel="noopener">Google Safe Browsing</a>
       and
       <a href="https://www.virustotal.com" target="_blank" rel="noopener">VirusTotal</a>.
@@ -97,7 +136,19 @@
     <p class="served-by" id="served-by"></p>
   </footer>
 
+  <!-- theme switch is here and not in script.js so that file stays
+       just the scanning and history code -->
+  <script>
+    (function () {
+      var btn = document.getElementById('theme-toggle');
+      btn.addEventListener('click', function () {
+        var next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('clickcheck-theme', next); } catch (e) {}
+      });
+    })();
+  </script>
+
   <script src="script.js"></script>
 </body>
 </html>
-
