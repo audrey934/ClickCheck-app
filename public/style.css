@@ -1,266 +1,563 @@
-/* clickcheck styles
-   colours are all defined once up here so I can reuse them */
-
+/* clickcheck styles */
 :root {
-  --paper: #f4f7f9;
-  --card: #ffffff;
-  --ink: #13232e;
-  --steel: #5a7184;
-  --line: #dbe4ea;
-  --cobalt: #2456a6;
-  --safe: #177a4f;
-  --warn: #b06e08;
-  --danger: #bd3229;
-  --radius: 14px;
-  --shadow: 0 10px 30px rgba(19, 35, 46, 0.08);
+  --paper:    #e8eae9;
+  --surface:  #f7f8f8;
+  --sunken:   #dfe2e1;
+  --ink:      #16191b;
+  --muted:    #5e6a6e;
+  --faint:    #8b9497;
+  --rule:     #c8cfce;
+  --rule-soft:#d8dddc;
+
+  --safe:      #0f6e4a;
+  --suspicious:#9a6200;
+  --dangerous: #ad2117;
+
+  --safe-wash:      #dfeee7;
+  --suspicious-wash:#f4e8d2;
+  --dangerous-wash: #f4dedc;
+
+  --focus: #16191b;
+
+  --step: 0.35rem;
+  --col: 68rem;
+
   font-size: 16px;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* dark mode  */
+[data-theme="dark"] {
+  --paper:    #111314;
+  --surface:  #191c1d;
+  --sunken:   #0b0d0e;
+  --ink:      #e9ebea;
+  --muted:    #98a2a5;
+  --faint:    #6d7679;
+  --rule:     #2b3032;
+  --rule-soft:#222627;
+
+  --safe:      #46c48c;
+  --suspicious:#e0a63a;
+  --dangerous: #f2705f;
+
+  --safe-wash:      #12271f;
+  --suspicious-wash:#2a2113;
+  --dangerous-wash: #2c1715;
+
+  --focus: #e9ebea;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* script.js hides things with .hidden = true, so this has to beat
+   the display rules further down or nothing would ever hide */
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
 
 body {
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
   background: var(--paper);
   color: var(--ink);
   line-height: 1.55;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-main { width: min(760px, 92%); margin: 0 auto; flex: 1; }
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* small label above each section */
+.eyebrow {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: calc(var(--step) * 2);
+}
 
 /* top bar with the logo */
+
 .site-header {
-  width: min(760px, 92%);
+  width: min(var(--col), 90%);
   margin: 0 auto;
-  padding: 2.2rem 0 1.6rem;
+  padding: 1.8rem 0 1.4rem;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  font-family: "Space Grotesk", sans-serif;
+  gap: 0.5rem;
+}
+
+.brand-mark { width: 26px; height: 26px; color: var(--ink); }
+
+.brand-name {
+  font-family: "Archivo", sans-serif;
   font-weight: 700;
-  font-size: 1.5rem;
-  letter-spacing: -0.02em;
+  font-size: 1.3rem;
+  letter-spacing: -0.035em;
 }
 
-.brand-mark { width: 30px; height: 30px; color: var(--cobalt); }
-
-.tagline {
-  font-family: "Space Grotesk", sans-serif;
-  color: var(--steel);
-  font-size: 1rem;
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
-.tagline em { font-style: normal; color: var(--cobalt); }
+.theme-toggle:hover { color: var(--ink); border-color: var(--ink); }
+.theme-toggle svg { width: 18px; height: 18px; }
+
+/* moon when the page is light, sun when it is dark */
+.icon-sun  { display: none; }
+.icon-moon { display: block; }
+[data-theme="dark"] .icon-sun  { display: block; }
+[data-theme="dark"] .icon-moon { display: none; }
+
+main {
+  width: min(var(--col), 90%);
+  margin: 0 auto;
+  flex: 1;
+  padding-bottom: 4rem;
+}
 
 /* the scan box */
+
 .scanner {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 1.6rem;
+  padding: 3.2rem 0 2.4rem;
 }
 
 .scanner-label {
-  display: block;
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 500;
-  margin-bottom: 0.7rem;
+  font-family: "Archivo", sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.7rem, 4.2vw, 2.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  max-width: 22ch;
+  margin-bottom: 1.6rem;
+}
+.scanner-label label { cursor: pointer; }
+
+/* highlight behind the word "before" */
+.scanner-label em {
+  font-style: normal;
+  box-shadow: inset 0 -0.34em 0 var(--sunken);
 }
 
-.scanner-bar { display: flex; gap: 0.6rem; }
+.scanner-bar {
+  display: flex;
+  gap: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  background: var(--surface);
+  overflow: hidden;
+  max-width: 44rem;
+}
 
 #url-input {
   flex: 1;
-  font: inherit;
-  padding: 0.85rem 1rem;
-  border: 1.5px solid var(--line);
-  border-radius: 10px;
+  min-width: 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.95rem;
+  padding: 0.95rem 1rem;
+  border: 0;
+  background: transparent;
   color: var(--ink);
-  background: #fbfdfe;
 }
-#url-input:focus { outline: 2px solid var(--cobalt); outline-offset: 1px; border-color: transparent; }
+#url-input::placeholder { color: var(--faint); }
+#url-input:focus { outline: none; }
+.scanner-bar:focus-within { box-shadow: 0 0 0 3px var(--sunken); }
 
 #scan-btn {
-  font: inherit;
-  font-weight: 600;
-  padding: 0.85rem 1.4rem;
-  border: none;
-  border-radius: 10px;
-  background: var(--cobalt);
-  color: #fff;
-  cursor: pointer;
-  transition: transform 0.08s ease, background 0.15s ease;
-}
-#scan-btn:hover { background: #1c4587; }
-#scan-btn:active { transform: scale(0.98); }
-#scan-btn:disabled { background: var(--steel); cursor: wait; }
-#scan-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-
-.scanner-hint { margin-top: 0.8rem; font-size: 0.83rem; color: var(--steel); }
-
-.form-error {
-  margin-top: 0.8rem;
-  color: var(--danger);
-  font-weight: 500;
+  font-family: "IBM Plex Sans", sans-serif;
   font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 0 1.5rem;
+  border: 0;
+  border-left: 1.5px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+#scan-btn:hover:not(:disabled) { opacity: 0.82; }
+#scan-btn:disabled { opacity: 0.5; cursor: progress; }
+
+.scanner-hint {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  max-width: 52ch;
 }
 
-/* verdict card */
+/* error message under the input */
+.form-error {
+  margin-top: 0.9rem;
+  padding: 0.6rem 0.85rem;
+  border-left: 3px solid var(--dangerous);
+  background: var(--dangerous-wash);
+  color: var(--dangerous);
+  font-size: 0.87rem;
+  font-weight: 500;
+}
+
+/* result card. the thick left border is the verdict colour, so you
+   can tell safe from dangerous without reading anything */
+
 .verdict {
-  margin-top: 1.2rem;
-  border-radius: var(--radius);
-  border: 1.5px solid var(--line);
-  background: var(--card);
-  box-shadow: var(--shadow);
-  overflow: hidden;
+  --vc: var(--muted);
+  --vwash: var(--sunken);
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 5px solid var(--vc);
+  border-radius: 2px;
+  padding: 1.8rem;
+  margin-bottom: 3rem;
+  animation: rise 0.25s ease-out;
 }
 
-.verdict-inner { display: flex; gap: 1.4rem; padding: 1.5rem 1.6rem; align-items: center; flex-wrap: wrap; }
+/* script.js puts safe / suspicious / dangerous on the section */
+.verdict.safe       { --vc: var(--safe);       --vwash: var(--safe-wash); }
+.verdict.suspicious { --vc: var(--suspicious); --vwash: var(--suspicious-wash); }
+.verdict.dangerous  { --vc: var(--dangerous);  --vwash: var(--dangerous-wash); }
 
-.verdict.safe      { border-color: var(--safe); }
-.verdict.suspicious{ border-color: var(--warn); }
-.verdict.dangerous { border-color: var(--danger); }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
 
+.verdict-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.8rem;
+  flex-wrap: wrap;
+}
+
+/* the score circle. script.js sets --pct on it inline */
 .score-dial {
-  --dial-color: var(--cobalt);
-  width: 96px; height: 96px;
+  --pct: 0;
+  position: relative;
+  flex: none;
+  width: 104px;
+  height: 104px;
+  display: grid;
+  place-items: center;
   border-radius: 50%;
-  display: grid; place-items: center;
-  background: conic-gradient(var(--dial-color) calc(var(--pct) * 1%), var(--line) 0);
-  flex-shrink: 0;
+  background: conic-gradient(
+    var(--vc) calc(var(--pct) * 1%),
+    var(--rule-soft) 0
+  );
 }
-.score-dial::after { content: ""; position: absolute; }
-.score-dial .dial-center {
-  width: 72px; height: 72px;
-  background: var(--card);
+/* tick marks around the ring */
+.score-dial::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
-  display: grid; place-items: center;
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 700;
-  font-size: 1.35rem;
+  background: repeating-conic-gradient(
+    var(--surface) 0deg 1.2deg,
+    transparent 1.2deg 9deg
+  );
 }
-.verdict.safe       .score-dial { --dial-color: var(--safe); }
-.verdict.suspicious .score-dial { --dial-color: var(--warn); }
-.verdict.dangerous  .score-dial { --dial-color: var(--danger); }
+/* hole in the middle so it reads as a ring */
+.score-dial::after {
+  content: "";
+  position: absolute;
+  inset: 13px;
+  border-radius: 50%;
+  background: var(--surface);
+}
 
-.verdict-text { flex: 1; min-width: 220px; }
+.dial-center {
+  position: relative;
+  z-index: 1;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 1.75rem;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: var(--vc);
+}
+
+.verdict-text { flex: 1; min-width: 15rem; }
 
 .verdict-title {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 1.3rem;
+  font-family: "Archivo", sans-serif;
   font-weight: 700;
-  margin-bottom: 0.15rem;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+  color: var(--vc);
+  margin-bottom: 0.4rem;
 }
-.verdict.safe       .verdict-title { color: var(--safe); }
-.verdict.suspicious .verdict-title { color: var(--warn); }
-.verdict.dangerous  .verdict-title { color: var(--danger); }
 
 .verdict-url {
-  font-size: 0.88rem;
-  color: var(--steel);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
   word-break: break-all;
-  margin-bottom: 0.6rem;
+  padding-bottom: 0.9rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 1px solid var(--rule-soft);
 }
 
-.verdict-detail { font-size: 0.9rem; }
-.verdict-detail li { margin-left: 1.1rem; margin-top: 0.15rem; }
+/* the one line per api */
+.verdict-detail { list-style: none; }
+.verdict-detail li {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  padding: 0.28rem 0 0.28rem 1rem;
+  position: relative;
+}
+.verdict-detail li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.85em;
+  width: 5px;
+  height: 1px;
+  background: var(--faint);
+}
 
 .verdict-advice {
-  padding: 0.8rem 1.6rem;
-  font-size: 0.88rem;
-  font-weight: 500;
-  border-top: 1px solid var(--line);
-  background: #fbfdfe;
+  margin-top: 1.5rem;
+  padding: 0.9rem 1.1rem;
+  background: var(--vwash);
+  border-radius: 2px;
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
-.verdict.dangerous .verdict-advice { background: #fdf1f0; color: var(--danger); }
-.verdict.suspicious .verdict-advice { background: #fdf6ea; color: var(--warn); }
-.verdict.safe .verdict-advice { background: #eff8f3; color: var(--safe); }
 
 /* past scans table */
-.history { margin: 2rem 0 2.5rem; }
+
+.history { border-top: 1px solid var(--rule); padding-top: 2.4rem; }
 
 .history-head {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 0.9rem;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
 }
-.history-head h2 { font-family: "Space Grotesk", sans-serif; font-size: 1.15rem; }
+
+.history-head h2 {
+  font-family: "Archivo", sans-serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
 
 .ghost-btn {
-  font: inherit; font-size: 0.83rem;
-  background: none; border: 1px solid var(--line);
-  border-radius: 8px; padding: 0.35rem 0.8rem;
-  color: var(--steel); cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.45rem 0.9rem;
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
-.ghost-btn:hover { color: var(--danger); border-color: var(--danger); }
+/* goes red on hover since it deletes things */
+.ghost-btn:hover { color: var(--dangerous); border-color: var(--dangerous); }
 
-.history-controls { display: flex; gap: 0.6rem; margin-bottom: 0.9rem; flex-wrap: wrap; }
-.history-controls input, .history-controls select {
-  font: inherit; font-size: 0.9rem;
-  padding: 0.55rem 0.75rem;
-  border: 1.5px solid var(--line);
-  border-radius: 8px;
-  background: var(--card);
+/* search / filter / sort row */
+.history-controls {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+
+#history-search {
+  flex: 1;
+  min-width: 12rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.85rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--surface);
   color: var(--ink);
 }
-.history-controls input { flex: 1; min-width: 180px; }
-.history-controls :focus { outline: 2px solid var(--cobalt); outline-offset: 1px; }
+#history-search::placeholder { color: var(--faint); }
+
+#history-filter, #history-sort {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
 
 .table-wrap {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--surface);
   overflow-x: auto;
 }
 
-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--line); }
-th { font-family: "Space Grotesk", sans-serif; font-weight: 500; color: var(--steel); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
-tr:last-child td { border-bottom: none; }
-td.url-cell { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
 
+#history-table th {
+  text-align: left;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+
+#history-table td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--rule-soft);
+  vertical-align: middle;
+}
+#history-table tr:last-child td { border-bottom: 0; }
+#history-table tbody tr:hover { background: var(--paper); }
+
+/* monospace so a fake domain is easier to spot */
+.url-cell {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8rem;
+  max-width: 26rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* risk and date columns are numbers too */
+#history-table td:nth-child(3),
+#history-table td:nth-child(4) {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* the little safe / suspicious / dangerous tag */
 .badge {
   display: inline-block;
-  padding: 0.18rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 2px;
+  border: 1px solid currentColor;
 }
-.badge.safe       { background: #e2f3ea; color: var(--safe); }
-.badge.suspicious { background: #f9eed6; color: var(--warn); }
-.badge.dangerous  { background: #fadfdd; color: var(--danger); }
+.badge.safe       { color: var(--safe);       background: var(--safe-wash); }
+.badge.suspicious { color: var(--suspicious); background: var(--suspicious-wash); }
+.badge.dangerous  { color: var(--dangerous);  background: var(--dangerous-wash); }
 
-.history-empty { padding: 1.4rem; text-align: center; color: var(--steel); font-size: 0.9rem; }
+.history-empty {
+  padding: 2.2rem 1rem;
+  text-align: center;
+  color: var(--faint);
+  font-size: 0.87rem;
+}
 
 /* footer */
+
 .site-footer {
-  width: min(760px, 92%);
+  width: min(var(--col), 90%);
   margin: 0 auto;
-  padding: 1.4rem 0 2rem;
+  padding: 1.6rem 0 2.4rem;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.credits {
   font-size: 0.8rem;
-  color: var(--steel);
-  border-top: 1px solid var(--line);
+  color: var(--muted);
+  max-width: 58ch;
 }
-.site-footer a { color: var(--cobalt); }
-.served-by { margin-top: 0.3rem; }
+.credits a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+}
+.credits a:hover { border-bottom-color: var(--ink); }
 
-/* small screens & motion */
-@media (max-width: 540px) {
+/* shows which of my two web servers answered the request */
+.served-by {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+  white-space: nowrap;
+}
+/* only draw the dot once there is text in there */
+.served-by:not(:empty)::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--safe);
+  margin-right: 0.45rem;
+  vertical-align: middle;
+}
+
+/* phones */
+
+@media (max-width: 34rem) {
+  .scanner { padding-top: 2.2rem; }
   .scanner-bar { flex-direction: column; }
-  .verdict-inner { flex-direction: column; align-items: flex-start; }
-}
-@media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; }
+  #scan-btn {
+    border-left: 0;
+    border-top: 1.5px solid var(--ink);
+    padding: 0.85rem 1rem;
+  }
+  .verdict { padding: 1.3rem; }
+  .verdict-inner { gap: 1.2rem; }
+  .score-dial { width: 84px; height: 84px; }
+  .dial-center { font-size: 1.45rem; }
+  .history-head { flex-direction: column; align-items: flex-start; }
+  .url-cell { max-width: 13rem; }
 }
 
+/* for people who turn animations off */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
