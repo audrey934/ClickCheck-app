@@ -161,6 +161,29 @@ async function checkVirusTotal(url) {
 }
 
 // quick route to check the server is alive (the load balancer will use this)
+// simple in-memory cache so the same link doesn't get sent to the apis
+// twice in a row. virustotal only allows 4 requests a minute on the free
+// key, so this keeps me under the limit and makes repeat scans instant
+const CACHE_TTL_MS = 10 * 60 * 1000; // results count as fresh for 10 min
+const CACHE_MAX = 500;               
+const cache = new Map();
+
+function cacheGet(url) {
+  const hit = cache.get(url);
+  if (!hit) return null;
+  // too old, bin it and treat as a miss
+  if (Date.now() - hit.storedAt > CACHE_TTL_MS) {
+    cache.delete(url);
+    return null;
+  }
+  return hit.result;
+}
+
+function cacheSet(url, result) {
+  // if it's full drop the oldest one (a Map remembers insertion order)
+  if (cache.size >= CACHE_MAX) cache.delete(cache.keys().next().value);
+  cache.set(url, { storedAt: Date.now(), result });
+}
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', server: SERVER_NAME });
 });
@@ -173,7 +196,12 @@ app.post('/api/check', async (req, res) => {
       error: 'Please enter a valid URL, e.g. example.com or https://example.com',
     });
   }
-
+// already checked this link recently, so send the saved answer back
+// instead of calling both apis again
+  const cached = cacheGet(url);
+  if (cached) {
+    return res.json({ ...cached, cached: true, servedBy: SERVER_NAME });
+  }
   try {
     // ask both apis at the same time instead of one after the other
     const [gsb, vt] = await Promise.all([
@@ -210,14 +238,17 @@ app.post('/api/check', async (req, res) => {
       verdict = 'suspicious';
     }
 
-    res.json({
+    const result = {
       url,
       verdict,
       score,
       checkedAt: new Date().toISOString(),
       sources: { googleSafeBrowsing: gsb, virusTotal: vt },
-      servedBy: SERVER_NAME,
-    });
+    };
+
+    cacheSet(url, result);
+    res.json({ ...result, cached: false, servedBy: SERVER_NAME });
+ 
   } catch (err) {
     // last resort so the app never sends a raw crash to the user
     console.error('Check failed:', err);
