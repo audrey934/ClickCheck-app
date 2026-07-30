@@ -16,8 +16,8 @@ No account, no login, no app to install. Paste the link, get an answer in a few 
 | Web01 | [http://34.201.241.134:8080](http://34.201.241.134:8080) |
 | Web02 | [http://54.91.209.195:8080](http://54.91.209.195:8080) |
  
-The two web servers are listed so each deployment can be verified on its own. They serve plain HTTP on port 8080; normal traffic goes through the load balancer, which handles HTTPS and splits requests between them. The HTTPS certificate covers `theaudrey.tech` and `www.theaudrey.tech`, so opening a bare IP over HTTPS will show a certificate warning — that is expected, since certificates are issued to names rather than IP addresses.
- 
+Each server is listed so it can be verified on its own; normal traffic goes through the load balancer, which terminates HTTPS and splits requests between the two. A bare IP over HTTPS will warn, since the certificate covers the domain names rather than IPs. Port 8080 is public only so each server can be checked directly. In production, it would be scoped to the load balancer's subnet (sudo ufw allow from 10.227.0.0/17 to any port 8080).
+
 ## What it does
 
 - Scans every URL with two independent security APIs at the same time
@@ -36,8 +36,8 @@ The two web servers are listed so each deployment can be verified on its own. Th
 |---|---|
 | Empty input | "Please paste a link first", no request sent |
 | Invalid URL (`not a url`, `hello`) | 400 with a message explaining the expected format, before either API is called |
-| One API key missing or wrong | That source is reported as unavailable and the verdict is built from the other one |
-| One API down or erroring | Same — a partial verdict is returned rather than a failure |
+| One API key missing or wrong | That source is reported as unavailable, and the verdict is built from the other one |
+| One API down or erroring | A partial verdict is returned rather than a failure |
 | Both APIs unavailable | 502 with a plain message and the reason from each source |
 | VirusTotal rate limit (429) | Specific message telling the user to wait, instead of a generic error |
 | VirusTotal analysis never finishes | Polling gives up after a timeout instead of hanging |
@@ -110,15 +110,14 @@ npm install --omit=dev
  
 Create `.env` with the two API keys, `PORT=8080`, and `SERVER_NAME` (`web-01` or `web-02`). `SERVER_NAME` is the only difference between the two servers. It is returned by `/health` and in the `X-Served-By` header, which identifies the server that answered a request.
  
-Run it under systemd so it restarts on crash and survives a reboot, and open port 8080 in `ufw`, which by default only allows 22, 80 and 443:
+Run it under systemd so it restarts on crash and survives a reboot, and open port 8080 in `ufw`, which by default only allows 22, 80, and 443:
  
 ```bash
 sudo cp deployment/clickcheck.service /etc/systemd/system/
 sudo systemctl enable --now clickcheck
 sudo ufw allow 8080/tcp
-```
- 
-Each server also keeps checked URLs in memory for 10 minutes and returns the saved result instead of calling both APIs again. 
+``` 
+This opens 8080 publicly so each server can be verified directly; see the note above on scoping it to the load balancer's subnet in production. Each server also keeps checked URLs in memory for 10 minutes and returns the saved result instead of calling both APIs again. 
 
 **On the load balancer:** `deployment/haproxy.cfg` goes to `/etc/haproxy/haproxy.cfg`. The important part:
  
@@ -133,14 +132,14 @@ backend clickcheck_back
  
 `roundrobin` alternates between the two servers. `option httpchk GET /health` uses the app's own health route, so HAProxy checks the app is alive rather than only that the port is open, and `http-check expect status 200` takes a server out of rotation on any other response. The backends are addressed by internal IP.
  
-Validate before reloading — a broken config that is reloaded takes the load balancer down:
+Validate before reloading: a broken config that is reloaded takes the load balancer down:
  
 ```bash
 sudo haproxy -c -f /etc/haproxy/haproxy.cfg
 sudo systemctl reload haproxy
 ```
  
-HTTPS is terminated at the load balancer with a Let's Encrypt certificate, and plain http requests are redirected to https.
+HTTPS is terminated at the load balancer with a Let's Encrypt certificate, and plain HTTP requests are redirected to HTTPS.
  
 **Testing it works:**
  
@@ -163,7 +162,7 @@ The `server` field alternates between `web-01` and `web-02`. The same thing is v
 - VirusTotal's free tier allows 4 checks per minute.
 - History is per device and per browser, and is cleared with the browser's data.
 - The cache is per server, so a link can be scanned twice before it is cached on both.
-- "Suspicious" is uncommon — it requires suspicious engines but no malicious ones, so most results are safe or dangerous.
+- "Suspicious" is uncommon. It requires suspicious engines but no malicious ones, so most results are safe or dangerous.
 - Redirects are not followed, so a shortened link is checked as itself rather than its destination.
 
 ## Challenges
