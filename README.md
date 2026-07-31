@@ -5,7 +5,7 @@ Every day we receive links promising opportunities, jobs, scholarships, mobile m
 No account, no login, no app to install. Paste the link, get an answer in a few seconds. 
 
 - Live demo: [https://www.theaudrey.tech](https://www.theaudrey.tech)
-- Demo video:
+- Demo video: [Live demo](https://youtu.be/Z1_hk9bj0SI)
 
 
 ## Live deployment
