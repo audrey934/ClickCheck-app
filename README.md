@@ -12,7 +12,7 @@ No account, no login, no app to install. Paste the link, get an answer in a few 
  
 | | URL |
 |---|---|
-| Load balancer (use this one) | https://www.theaudrey.tech |
+| Load balancer | https://www.theaudrey.tech / [http://44.206.225.22](http://44.206.225.22) |
 | Web01 | [http://34.201.241.134:8080](http://34.201.241.134:8080) |
 | Web02 | [http://54.91.209.195:8080](http://54.91.209.195:8080) |
  
